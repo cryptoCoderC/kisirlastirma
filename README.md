@@ -1,0 +1,2 @@
+# kisirlastirma
+Kısırlaştırma Simülasyonu
