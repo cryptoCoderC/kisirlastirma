@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Kısırlaştırma Simülasyonu</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+
+        canvas {
+            max-width: 3800px;
+            margin-top: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="center">Kısırlaştırma Simülasyonu</h2>
+        <div class="alert alert-info">
+            <h5>Nasıl Çalışır?</h5>
+            Girilen yetişkin sayısının yarısı erkek-yarısı dişi kabul edilir ve tümü kısırlaştırılmamıştır. Dişiler doğurma aralığına göre bugünden geriye dönük sıralı bir şekilde doğum yapmış olarak kabul edilir. Örneğin doğurma aralığı 6 ay girilmiş ise geçtiğimiz 6 aylık sürede her bir gün mümkün olduğunca eşit sayıda dişi doğum yapmış olarak işaretlenir. <br /><br />
+            Doğum yapan bir dişi doğurma periyodu geçene kadar doğum yapamaz. Yeni doğan yavrular ilk doğurma süresi sonrasında eğer kısırlaştırılmamışlarsa doğum yapabilir hale gelir <br /><br />
+            Başlangıçtaki yetişkin popülasyonu oluşturulurken liste karıştırılır. <br />
+            Tek bir doğumdaki yavru adedi Minimum ve Maksimum aralığında rastgele seçilir.
+
+        </div>
+        <div class="alert alert-warning">
+            Hızlı çalıştır seçeneği işaretlendiğinde toplam yetişkin sayısı ve kısırlaştırma sayısı 10'un katları şeklinde girilmelidir.
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="adultDogCount">Yetişkin Kısırlaştırılmamış Sayısı (Erkek-Dişi Toplam):</label>
+                    <input type="number" id="adultDogCount" name="adultDogCount" class="form-control" min="1" required value="150">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="spayingCount">Günlük Dişi Kısırlaştırma Sayısı:</label>
+                    <input type="number" id="spayingCount" name="spayingCount" class="form-control" min="1" required value="1">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="breedingPeriod">Doğurma Aralığı (Ay):</label>
+                    <input type="number" id="breedingPeriod" name="breedingPeriod" class="form-control" min="6" max="12" required value="6">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="firstBreedingAge">Yeni Doğan Yavrunun İlk Doğurma Ayı :</label>
+                    <input type="number" id="firstBreedingAge" name="firstBreedingAge" class="form-control" min="6" max="12" required value="6">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="babyRangeMin">Tek Doğumda Minimum Yavru Adedi:</label>
+                    <input type="number" id="babyRangeMin" name="babyRangeMin" class="form-control" min="1" required value="2">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="babyRangeMax">Tek Doğumda Maximum Yavru Adedi:</label>
+                    <input type="number" id="babyRangeMax" name="babyRangeMax" class="form-control" min="1" required value="6">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="simulationDuration">Simülasyon Süresi (Yıl):</label>
+                    <input type="number" id="simulationDuration" name="simulationDuration" class="form-control" min="1" required value="1">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="chkSimplify">Hızlı Çalıştır:</label>
+                    <input type="checkbox" id="chkSimplify" name="chkSimplify" class="form-check-input btn" checked="checked">
+                    <br />
+                    <div class="alert alert-danger mt-2">Yüksek sayılarda bu alanı işaretleyiniz. Aksi halde işlem çok uzun sürecektir.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-success mb-3" onclick="startSimulation()">Simülasyonu Başlat</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div  id="txtResult"></div>
+            </div>
+        </div>
+
+
+    </div>
+    <br />
+    <canvas id="myChart"></canvas>
+    <br />
+
+    <table id="simulationTable">
+        <tr>
+            <th>Gün</th>
+            <th>Tarih</th>
+            <th>Yetişkin Erkek</th>
+            <th>Yetişkin Kısır Dişi</th>
+            <th>Yetişkin Doğurgan Dişi</th>
+            <th>Bugün Doğuran Dişi</th>
+            <th>Toplam Dişi</th>
+            <th>Toplam Erkek Yavru</th>
+            <th>Toplam Dişi Yavru</th>
+            <th>Bugünkü Toplam Sayı</th>
+
+        </tr>
+    </table>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function shuffle(array) {
+            let currentIndex = array.length;
+
+            // While there remain elements to shuffle...
+            while (currentIndex != 0) {
+
+                // Pick a remaining element...
+                let randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+        }
+
+        // Create dogs
+        this.Dogs = [];
+        class DogSimulator {
+            constructor(totalCount, spayingPerDay, breedingPeriod, minBaby, maxBaby, firstBreedingAge) {
+                this.SpayingCountPerDay = spayingPerDay;
+                this.BreedingPeriod = breedingPeriod;
+                this.MinBabyCount = minBaby;
+                this.MaxBabyCount = maxBaby;
+                this.FirstBreedingAge = firstBreedingAge;
+
+                this.Dogs = [];
+                var now = new Date();
+                for (let i = 0; i < totalCount; i++) {
+                    var dog = {
+                        birthDate: new Date(),
+                        gender: i % 2 === 0 ? "Male" : "Female",
+                        isBaby: false,
+                        ageDays: 0,
+                        guid: this.generateGuid(),
+                        nextBreedDate: new Date(0)
+                    };
+                    //   dog.birthDate.setDate(dog.birthDate.getDate() - (firstBreedingAge * 30))
+                    dog.birthDate = moment(dog.birthDate).subtract(firstBreedingAge + 1, 'months').toDate();
+
+
+                    this.Dogs.push(dog);
+                }
+
+                var breedPerDate = Math.max(1, totalCount / (this.BreedingPeriod * 30)) + 1;
+
+                var firstPreviousBreedDate = new Date();
+                //   firstPreviousBreedDate.setDate(firstPreviousBreedDate.getDate() - (firstBreedingAge * 31))
+                firstPreviousBreedDate = moment(firstPreviousBreedDate).subtract(firstBreedingAge, 'months').toDate();
+
+                while (firstPreviousBreedDate <= now) {
+                    let breedCountToday = 0;
+                    for (var oDog of this.Dogs.filter(f => f.nextBreedDate.getDate() == new Date(0).getDate())) {
+                        oDog.lastBreedDate = new Date(firstPreviousBreedDate);
+                        oDog.nextBreedDate = moment(firstPreviousBreedDate).add(firstBreedingAge, 'months').toDate();
+                        breedCountToday++;
+                        if (breedCountToday >= breedPerDate) {
+                            break;
+                        }
+                    }
+
+                    //  firstPreviousBreedDate.setDate(firstPreviousBreedDate.getDate() + 1);
+                    firstPreviousBreedDate = moment(firstPreviousBreedDate).add(1, 'days').toDate();;
+                }
+
+                this.Dogs.sort((a, b) => a.guid - b.guid);
+                this.Dogs.reverse();
+                shuffle(this.Dogs);
+            }
+
+            generateGuid() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = Math.random() * 16 | 0;
+                    var v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+
+            calculateOneDay(today) {
+                // Spaying calculation
+                let todaySpayed = 0;
+                for (var dog of this.Dogs.filter(f => f.gender === "Female" && !f.isSpayed)) {
+                    if (todaySpayed < this.SpayingCountPerDay) {
+                        dog.isSpayed = true;
+                        todaySpayed++;
+                    }
+                }
+
+                // Calculate the dog count that will breed today.
+                //   var breedableDogs = this.Dogs.filter(f => !f.isSpayed && f.gender === "Female" && new Date(f.lastBreedDate.getTime() + (this.BreedingPeriod * 30 * 24 * 60 * 60 * 1000)) < today);
+                //   var breedableDogs = this.Dogs.filter(f => !f.isSpayed && f.gender === "Female" && moment(f.lastBreedDate).add(this.BreedingPeriod, 'months').toDate() < today);
+                var breedableDogs = this.Dogs.filter(f => !f.isBaby && !f.isSpayed && f.gender === "Female" && f.nextBreedDate < today);
+
+                var breedableCount = breedableDogs.length;
+                var puppies = [];
+
+                let todaysMalePuppyCount = 0;
+                let todaysFemalePuppyCount = 0;
+                for (var dog of breedableDogs) {
+                    var babyCount = Math.floor(Math.random() * (this.MaxBabyCount - this.MinBabyCount + 1)) + this.MinBabyCount;
+
+                    for (let i = 0; i < babyCount; i++) {
+                        var puppy = {
+                            ageDays: 0,
+                            birthDate: new Date(today),
+                            isSpayed: false,
+
+                            isBaby: true
+                        };
+                        puppy.gender = todaysMalePuppyCount > todaysFemalePuppyCount ? "Female" : "Male";
+                        puppy.nextBreedDate = moment(puppy.birthDate).add(this.BreedingPeriod, 'months').toDate();
+
+                        if (puppy.gender === "Male") {
+                            todaysMalePuppyCount++;
+                        } else {
+                            todaysFemalePuppyCount++;
+                        }
+                        puppies.push(puppy);
+                    }
+                    dog.lastBreedDate = new Date(today);
+                    dog.nextBreedDate = moment(today).add(this.BreedingPeriod, 'months').toDate();
+                }
+
+                this.Dogs.push(...puppies);
+
+                // Add age for each dog.
+                for (var dog of this.Dogs) {
+                    dog.ageDays++;
+                    if (Math.floor(dog.ageDays / 30) > this.BreedingPeriod) {
+                        dog.isBaby = false;
+                    }
+                }
+
+                return breedableCount;
+            }
+
+            run(years, simplifyNumber) {
+                var results = [];
+                let today = new Date();
+                var end = moment(today).add(1, 'years').toDate();
+                //   end.setDate(end.getDate() + years * 365);
+                let day = 0;
+
+                while (today < end) {
+                    var todayBredFemales = this.calculateOneDay(today);
+
+                    var todaysResult = {
+                        Day: day,
+                        Date: today,
+                        MaleAdultCount: this.Dogs.filter(f => !f.isBaby && f.gender === "Male").length * simplifyNumber,
+                        FemaleAdultSpayedCount: this.Dogs.filter(f => f.isSpayed).length * simplifyNumber,
+                        FemaleBreedableCount: this.Dogs.filter(f => !f.isSpayed && !f.isBaby && f.gender === "Female").length * simplifyNumber,
+                        FemaleBredToday: todayBredFemales * simplifyNumber,
+                        FemaleAdultCount: this.Dogs.filter(f => !f.isBaby && f.gender === "Female").length * simplifyNumber,
+                        MaleBabyCount: this.Dogs.filter(f => f.isBaby && f.gender === "Male").length * simplifyNumber,
+                        FemaleBabyCount: this.Dogs.filter(f => f.isBaby && f.gender === "Female").length * simplifyNumber,
+                        get TotalCount() {
+                            return this.MaleAdultCount + this.FemaleAdultCount + this.MaleBabyCount + this.FemaleBabyCount;
+                        }
+                    };
+
+                    results.push(todaysResult);
+
+                    day++;
+                    today = moment(today).add(1, 'days').toDate();//  setDate(today.getDate() + 1);
+                }
+
+                return results;
+            }
+        }
+
+
+   
+      
+        function startSimulation() {
+            // Fetching user inputs
+
+            let simplifyRatio = 1;
+            var spayCount = parseInt(document.getElementById("spayingCount").value);
+            let totalCount = parseInt(document.getElementById("adultDogCount").value);
+            if (document.getElementById("chkSimplify").checked) {
+                simplifyRatio = spayCount;
+                totalCount = Math.floor(totalCount / spayCount);
+                spayCount = 1;
+            }
+
+            var simulator = new DogSimulator(
+                totalCount,
+                spayCount,
+                parseInt(document.getElementById("breedingPeriod").value),
+                parseInt(document.getElementById("babyRangeMin").value),
+                parseInt(document.getElementById("babyRangeMax").value),
+                parseInt(document.getElementById("firstBreedingAge").value)
+            );
+
+            var result = simulator.run(parseInt(document.getElementById("simulationDuration").value), simplifyRatio);
+            document.getElementById("simulationTable").innerHTML = `<tr>
+                        <th> Gün</th>
+                    <th>Tarih</th>
+                    <th>Yetişkin Erkek</th>
+                    <th>Yetişkin Kısır Dişi</th>
+                    <th>Yetişkin Doğurgan Dişi</th>
+                    <th>Bugün Doğuran Dişi</th>
+                    <th>Toplam Dişi</th>
+                    <th>Toplam Erkek Yavru</th>
+                    <th>Toplam Dişi Yavru</th>
+                    <th>Bugünkü Toplam Sayı</th>
+
+                </tr>`;
+            // Clear previous data
+            result.forEach((item, index) => {
+                var row = document.createElement("tr");
+
+                row.innerHTML = `<td>${item.Day}</td>
+                                 <td>${moment(item.Date).format("DD.MM.YYYY")}</td>
+                                 <td>${item.MaleAdultCount}</td>
+                                 <td>${item.FemaleAdultSpayedCount}</td>
+                                 <td>${item.FemaleBreedableCount}</td>
+                                 <td>${item.FemaleBredToday}</td>
+                                 <td>${item.FemaleAdultCount}</td>
+                                 <td>${item.MaleBabyCount}</td>
+                                 <td>${item.FemaleBabyCount}</td>
+                                 <td>${item.TotalCount}</td>`;
+                document.getElementById("simulationTable").appendChild(row);
+            });
+
+            var txtResult = document.getElementById("txtResult");
+            if (result[0].FemaleBreedableCount < result[result.length - 1].FemaleBreedableCount) {
+                txtResult.innerText = "Nüfus kontrolü başarısız!";
+                txtResult.className = "alert alert-danger";
+            } else {
+                txtResult.innerText = "Nüfus kontrolü başarılı.";
+                txtResult.className = "alert alert-success";
+            }
+
+            renderChart(result);
+        }
+        var myChart;
+        function renderChart(results) {
+
+            if (typeof myChart !== 'undefined') {
+                // Destroy the existing chart
+                myChart.destroy();
+            }
+
+            // Grouping results by date and summing up counts
+            const dates = results.map(result => moment(result.Date).format("DD.MM.YYYY"));
+           const maleAdultCounts = results.map(result => result.MaleAdultCount);
+           const femaleAdultCounts = results.map(result => result.FemaleAdultCount);
+           const maleBabyCounts = results.map(result => result.MaleBabyCount);
+           const femaleBabyCounts = results.map(result => result.FemaleBabyCount);
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+     myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [
+                {
+                    label: 'Erkek Yetişkin',
+                    backgroundColor: '#3dc1d3',
+                    borderColor: '#546de5',
+                    borderWidth: 1,
+                    data: maleAdultCounts,
+                    stack: 'Stack 0'
+                },
+                {
+                    label: 'Dişi Yetişkin',
+                    backgroundColor: '#e15f41',
+                    borderColor: '#c44569',
+                    borderWidth: 1,
+                    data: femaleAdultCounts,
+                    stack: 'Stack 0'
+                },
+                {
+                    label: 'Erkek Yavru',
+                    backgroundColor: '#63cdda',
+                    borderColor: '#596275',
+                    borderWidth: 1,
+                    data: maleBabyCounts,
+                    stack: 'Stack 0'
+                },
+                {
+                    label: 'Dişi Yavru',
+                    backgroundColor: '#e77f67',
+                    borderColor: '#596275',
+                    borderWidth: 1,
+                    data: femaleBabyCounts,
+                    stack: 'Stack 0'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                },
+                x: {
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            }
+        }
+    });
+
+    // Adding legend
+           var legend = document.getElementById('legend');
+           try {
+               legend.innerHTML = myChart.generateLegend();
+           } catch (e) {
+
+           }
+        
+        // myChart.destroy();
+}
+
+
+
+
+
+
+    </script>
+</body>
+</html>
