@@ -24,7 +24,7 @@
         }
 
         .button {
-            background-color: #4CAF50; /* Green */
+            background-color: #4CAF50; 
             border: none;
             color: white;
             padding: 15px 32px;
@@ -133,7 +133,14 @@
                 <div  id="txtResult"></div>
             </div>
         </div>
+        <div class="row">
+            <div class="small">
 
+
+                Yorum ve öneriler için
+                <a class="link" href="https://twitter.com/SehirlerGuvenli">@GüvenliTürkiye</a>
+            </div>
+        </div>
 
     </div>
     <br />
@@ -197,7 +204,7 @@
                         guid: this.generateGuid(),
                         nextBreedDate: new Date(0)
                     };
-                    //   dog.birthDate.setDate(dog.birthDate.getDate() - (firstBreedingAge * 30))
+              
                     dog.birthDate = moment(dog.birthDate).subtract(firstBreedingAge + 1, 'months').toDate();
 
 
@@ -207,7 +214,7 @@
                 var breedPerDate = Math.max(1, totalCount / (this.BreedingPeriod * 30)) + 1;
 
                 var firstPreviousBreedDate = new Date();
-                //   firstPreviousBreedDate.setDate(firstPreviousBreedDate.getDate() - (firstBreedingAge * 31))
+            
                 firstPreviousBreedDate = moment(firstPreviousBreedDate).subtract(firstBreedingAge, 'months').toDate();
 
                 while (firstPreviousBreedDate <= now) {
@@ -221,7 +228,7 @@
                         }
                     }
 
-                    //  firstPreviousBreedDate.setDate(firstPreviousBreedDate.getDate() + 1);
+                    
                     firstPreviousBreedDate = moment(firstPreviousBreedDate).add(1, 'days').toDate();;
                 }
 
@@ -248,9 +255,7 @@
                     }
                 }
 
-                // Calculate the dog count that will breed today.
-                //   var breedableDogs = this.Dogs.filter(f => !f.isSpayed && f.gender === "Female" && new Date(f.lastBreedDate.getTime() + (this.BreedingPeriod * 30 * 24 * 60 * 60 * 1000)) < today);
-                //   var breedableDogs = this.Dogs.filter(f => !f.isSpayed && f.gender === "Female" && moment(f.lastBreedDate).add(this.BreedingPeriod, 'months').toDate() < today);
+            
                 var breedableDogs = this.Dogs.filter(f => !f.isBaby && !f.isSpayed && f.gender === "Female" && f.nextBreedDate < today);
 
                 var breedableCount = breedableDogs.length;
@@ -299,8 +304,9 @@
             run(years, simplifyNumber) {
                 var results = [];
                 let today = new Date();
-                var end = moment(today).add(1, 'years').toDate();
-                //   end.setDate(end.getDate() + years * 365);
+                var years = parseInt(document.getElementById("simulationDuration").value);
+                var end = moment(today).add(years, 'years').toDate();
+               
                 let day = 0;
 
                 while (today < end) {
@@ -324,7 +330,7 @@
                     results.push(todaysResult);
 
                     day++;
-                    today = moment(today).add(1, 'days').toDate();//  setDate(today.getDate() + 1);
+                    today = moment(today).add(1, 'days').toDate();
                 }
 
                 return results;
@@ -474,7 +480,7 @@
 
            }
         
-        // myChart.destroy();
+        
 }
 
 
