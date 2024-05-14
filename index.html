@@ -83,7 +83,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label for="firstBreedingAge">Yeni Doğan Yavrunun İlk Doğurma Ayı :</label>
-                    <input type="number" id="firstBreedingAge" name="firstBreedingAge" class="form-control" min="6" max="12" required value="6">
+                    <input type="number" id="firstBreedingAge" name="firstBreedingAge" class="form-control" min="6" max="12" required value="12">
                 </div>
             </div>
         </div>
@@ -112,31 +112,50 @@
             </div>
             <div class="col-md-6">
                 <div class="form-group">
-                    <label for="chkSimplify">Hızlı Çalıştır:</label>
+                    <label for="chkSimplify">Hızlı Çalıştır: <span style="color:red">Yüksek sayılarda bu alanı işaretleyiniz. Aksi halde işlem çok uzun sürecektir.</span> </label>
                     <input type="checkbox" id="chkSimplify" name="chkSimplify" class="form-check-input btn" checked="checked">
-                    <br />
-                    <div class="alert alert-danger mt-2">Yüksek sayılarda bu alanı işaretleyiniz. Aksi halde işlem çok uzun sürecektir.</div>
+                    
                 </div>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6">
-
+                <div class="form-group">
+                    <label for="simulationDuration">Tek Kısırlaştırma Maliyeti (TL):</label>
+                    <input type="number" id="txtSingleCost" name="txtSingleCost" class="form-control" min="1" required value="4000">
+                </div>
             </div>
             <div class="col-md-6">
                 <button class="btn btn-success mb-3" onclick="startSimulation()">Simülasyonu Başlat</button>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12">
-                <div  id="txtResult"></div>
+            <div class="col-md-6">
+                <br />
+                <div id="txtResult"></div>
+            </div>
+            <div class="col-md-6">
+                <br />
+                <div id="txtCostTotal" ></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="small">
+                <br />
+                Notlar:<br />
+                1. Yavru ve yetişkin ölümleri hesaba dahil edilmemiştir. Yavru ölümlerinin etkisini yavru sayılarını 'hayatta kalanların sayısı' şeklinde düşünüp buna göre giriş yaparak  gözlemleyebilirsiniz <br />
+                2. Popülasyonun ilk oluşturma aşamasında liste karıştırılmakta ancak, sonradan eklenen yavrularda bu karma tekrardan yapılmamaktadır. Bu durum, yavrulara doğum sırasına göre kısırlaştırma sırası getirir. İlk nesilde yetişkinlere öncelik veriliyor olması, üreme hızını negatif etkileyebilir.<br />
+                3. Aynı sayıları girmenize rağmen sonuçlar birebir aynı olmayacaktır. Yavruların sayısının verilen aralıkta rastgele seçiliyor olması ile erkek ve dişi yavru sayısındaki küçük farklar, sonraki nesillerde belirgin nüfus farkına sebep olabilir.<br />
+                4. Hızlı çalıştır seçeneği toplam sayı ve kısırlaştırma sayısını sadeleştirerek işlem yapar. Yüksek sayılarda hızlı sonuç alınır.
+                
             </div>
         </div>
         <div class="row">
             <div class="small">
-
-
+                <br />
+                v 1.0 <br />
                 Yorum ve öneriler için
                 <a class="link" href="https://twitter.com/SehirlerGuvenli">@GüvenliTürkiye</a>
             </div>
@@ -316,7 +335,7 @@
                         Day: day,
                         Date: today,
                         MaleAdultCount: this.Dogs.filter(f => !f.isBaby && f.gender === "Male").length * simplifyNumber,
-                        FemaleAdultSpayedCount: this.Dogs.filter(f => f.isSpayed).length * simplifyNumber,
+                        FemaleSpayedCount: this.Dogs.filter(f => f.isSpayed).length * simplifyNumber,
                         FemaleBreedableCount: this.Dogs.filter(f => !f.isSpayed && !f.isBaby && f.gender === "Female").length * simplifyNumber,
                         FemaleBredToday: todayBredFemales * simplifyNumber,
                         FemaleAdultCount: this.Dogs.filter(f => !f.isBaby && f.gender === "Female").length * simplifyNumber,
@@ -366,7 +385,7 @@
                         <th> Gün</th>
                     <th>Tarih</th>
                     <th>Yetişkin Erkek</th>
-                    <th>Yetişkin Kısır Dişi</th>
+                    <th>Kısır Dişi</th>
                     <th>Yetişkin Doğurgan Dişi</th>
                     <th>Bugün Doğuran Dişi</th>
                     <th>Toplam Dişi</th>
@@ -375,6 +394,15 @@
                     <th>Bugünkü Toplam Sayı</th>
 
                 </tr>`;
+
+            var txtCost = document.getElementById("txtSingleCost");
+            var txtTotalCost = document.getElementById("txtCostTotal");
+            var unitCost = parseInt(txtCost.value);
+            var totalSpayedDogCount = result[result.length - 1].FemaleSpayedCount;
+            var totalCost = (unitCost * totalSpayedDogCount).toLocaleString();
+            txtTotalCost.innerText ="Toplam Kısırlaştırma Maliyeti: "+ totalCost + " TL";
+            txtTotalCost.className = "alert alert-warning";
+
             // Clear previous data
             result.forEach((item, index) => {
                 var row = document.createElement("tr");
@@ -382,7 +410,7 @@
                 row.innerHTML = `<td>${item.Day}</td>
                                  <td>${moment(item.Date).format("DD.MM.YYYY")}</td>
                                  <td>${item.MaleAdultCount}</td>
-                                 <td>${item.FemaleAdultSpayedCount}</td>
+                                 <td>${item.FemaleSpayedCount}</td>
                                  <td>${item.FemaleBreedableCount}</td>
                                  <td>${item.FemaleBredToday}</td>
                                  <td>${item.FemaleAdultCount}</td>
@@ -400,6 +428,7 @@
                 txtResult.innerText = "Nüfus kontrolü başarılı.";
                 txtResult.className = "alert alert-success";
             }
+        
 
             renderChart(result);
         }
